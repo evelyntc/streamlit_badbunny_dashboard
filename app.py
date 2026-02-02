@@ -6,7 +6,11 @@ import plotly.graph_objects as go
 # Page configuration
 # ----------------------------
 st.set_page_config(layout="wide")
+
 st.title("🐰 Bad Bunny Spotify Music Data")
+st.caption("🌐 Explore my full data portfolio → https://evelyntc.streamlit.app/")
+
+
 # Custom CSS for custom width
 st.markdown("""
 <style>
@@ -21,7 +25,8 @@ photo, welcome_msg = st.columns((1, 2.5), vertical_alignment="center")
 with photo:
     st.image("bb.jpeg")
 with welcome_msg:
-    st.write(""" 🎬 add later """)
+    st.write(""" 🎶 The announcement of Bad Bunny as the 2026 Super Bowl Halftime Show performer surprised some people but the data shows it shouldn’t have.
+            \n This dashboard is designed to contextualize Bad Bunny’s career through data highlighting yearly growth and global popularity.""")
 
 # ----------------------------
 # Load data
@@ -96,71 +101,105 @@ with col5:
 # ============================
 # 📈 Yearly Popularity
 # ============================
-st.markdown("## 📈 Yearly Popularity")
+import plotly.graph_objects as go
 
-df_timeline = df[["release_date", "track_popularity"]].sort_values("release_date")
-df_timeline["cumulative_avg"] = df_timeline["track_popularity"].expanding().mean()
+st.markdown("## 📈 Bad Bunny's Yearly Growth")
 
-fig_growth = go.Figure()
-
-fig_growth.add_trace(go.Scatter(
-    x=df_timeline["release_date"],
-    y=df_timeline["cumulative_avg"],
-    mode="lines+markers",
-    line=dict(color="#ff1493", width=4),
-    marker=dict(size=8, symbol="star"),
-    fill="tozeroy",
-    fillcolor="rgba(255, 20, 147, 0.15)",
-    hovertemplate=(
-        "<b>Date:</b> %{x|%Y}<br>"
-        "<b>Cumulative Avg Popularity:</b> %{y:.1f}"
-        "<extra></extra>"
-    )
-))
-
-fig_growth.update_layout(
-    template="plotly_dark",
-    height=450,
-    showlegend=False,
-    hovermode="x unified",
-    yaxis=dict(
-        title="Spotify Popularity Score (0–100)",
-        range=[0, 100]
-    ),
-    annotations=[
-        dict(
-            xref="paper",
-            yref="paper",
-            x=0.99,
-            y=1.0,
-            xanchor="right",
-            showarrow=False,
-            text=(
-                "<b>What is Spotify Popularity?</b><br>"
-                "A 0–100 score based on recent streams,<br>"
-                "listener engagement, and growth velocity."
-            ),
-            bgcolor="rgba(0,0,0,0.6)",
-            font=dict(size=12)
-        ),
-        dict(
-            xref="paper",
-            yref="paper",
-            x=0.7,
-            y=0.2,
-            showarrow=False,
-            text="📈 Popularity compounds over time, not just hit releases",
-            font=dict(size=11, color="#d1d5db")
-        )
-    ]
+# ----------------------------
+# Prepare data
+# ----------------------------
+df_yearly = (
+    df.groupby(df["release_date"].dt.year)["track_popularity"]
+    .mean()
+    .reset_index()
+    .rename(columns={"release_date": "year", "track_popularity": "avg_popularity"})
 )
 
+# Year-over-year growth
+df_yearly["pop_growth"] = df_yearly["avg_popularity"].diff()
+
+# Find biggest jump
+max_growth_idx = df_yearly["pop_growth"].idxmax()
+max_growth_year = df_yearly.loc[max_growth_idx, "year"]
+max_growth_value = df_yearly.loc[max_growth_idx, "pop_growth"]
+max_growth_pop = df_yearly.loc[max_growth_idx, "avg_popularity"]
+
+# Cumulative average for reference (optional trace)
+df_yearly["cumulative_avg"] = df_yearly["avg_popularity"].expanding().mean()
+
+# ----------------------------
+# Create Plotly figure
+# ----------------------------
+fig_growth = go.Figure()
+
+# Line: cumulative average (optional, light background)
+fig_growth.add_trace(go.Scatter(
+    x=df_yearly["year"],
+    y=df_yearly["cumulative_avg"],
+    mode="lines",
+    line=dict(color="rgba(255,20,147,0.3)", width=3, dash="dot"),
+    name="Cumulative Avg",
+    hovertemplate="<b>Year:</b> %{x}<br><b>Cumulative Avg:</b> %{y:.1f}<extra></extra>"
+))
+
+# Line + markers: yearly avg popularity
+fig_growth.add_trace(go.Scatter(
+    x=df_yearly["year"],
+    y=df_yearly["avg_popularity"],
+    mode="lines+markers",
+    line=dict(color="#ff1493", width=4),
+    marker=dict(size=10, symbol="circle"),
+    name="Yearly Avg",
+    hovertemplate="<b>Year:</b> %{x}<br><b>Avg Popularity:</b> %{y:.1f}<extra></extra>"
+))
+
+# Highlight biggest jump
+fig_growth.add_trace(go.Scatter(
+    x=[max_growth_year],
+    y=[max_growth_pop],
+    mode="markers+text",
+    marker=dict(size=18, color="gold", symbol="star"),
+    text=[f"⬆️ Biggest Jump (+{max_growth_value:.1f})"],
+    textposition="top center",
+    showlegend=False,
+    hovertemplate="<b>Year:</b> %{x}<br><b>Growth:</b> +%{text}<extra></extra>"
+))
+
+# ----------------------------
+# Layout
+# ----------------------------
+fig_growth.update_layout(
+    template="plotly_dark",
+    height=500,
+    title="Bad Bunny's popularity drastically increased in 2020 and while it plateaued a bit, he continued to grow in 2025!",
+    xaxis=dict(title="Year", dtick=1),
+    yaxis=dict(title="Popularity Score (0–100)", range=[0, 100]),
+    hovermode="x unified",
+    showlegend=True,
+)
+
+# Optional annotations
+fig_growth.add_annotation(
+    x=max_growth_year,
+    y=max_growth_pop,
+    text=f"Biggest jump here!",
+    showarrow=True,
+    arrowhead=2,
+    arrowcolor="gold",
+    ax=0,
+    ay=-40,
+    font=dict(color="gold", size=12)
+)
+
+# Display in Streamlit
 st.plotly_chart(fig_growth, use_container_width=True)
+
 
 # ============================
 # 🔥 Most Popular Tracks
 # ============================
 st.markdown("## 🎤 Most Popular Songs")
+st.write("Bad Bunny's top 3 most popular songs come from his 2025 album DeBÍ TiRAR MáS FOToS. ")
 
 top_n = st.slider("Number of tracks to display", 5, 20, 10)
 
@@ -195,8 +234,8 @@ st.plotly_chart(fig_tracks, use_container_width=True)
 # ============================
 # 🧠 Key Insights
 # ============================
-st.markdown("## 🧠 Key Takeaway: \n Bad Bunny's dominance isn't built on one era, it compounded with every release and this artist is only getting started.")
-st.markdown("### So what should you listen to first?")
+st.markdown("## 🧠 Key Takeaway: \n Bad Bunny's dominance isn't built on one era, it compounded with every release and this artist is only getting started." \
+"\n His latest album garnering his biggest hits. So if you haven't heard his music first where should you get started? ⬇️")
 
 st.markdown(f"""
 - **🎤 Most Popular Album:** {df.groupby("album_name")["track_popularity"].mean().idxmax()}  
@@ -211,9 +250,15 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #a0aec0; margin-top: 2rem;">
     <p style="font-size: 0.9rem;">🎵 Data powered by Spotify API | Last Updated: 2025</p>
-    <p style="font-size: 0.85rem; color: #718096;">Evelyn's Entertainment Data 🔥</p>
+    <p style="font-size: 0.85rem; color: #718096;">
+        Built by Evelyn | 
+        <a href="https://evelyntc.streamlit.app" target="_blank" style="color:#ff4b4b; text-decoration:none;">
+            View Full Portfolio
+        </a>
+    </p>
 </div>
 """, unsafe_allow_html=True)
+
 
 # --- STATCOUNTER ---
 st.html(
