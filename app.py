@@ -263,7 +263,7 @@ st.markdown("""
 
 
 # --- STATCOUNTER ---
-components.html(
+st.html(
 """<!-- Default Statcounter code for badbunnydashboard
 https://badbunnydashboard.streamlit.app/ -->
 <script type="text/javascript">
@@ -282,5 +282,4 @@ alt="Web Analytics"
 referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 <!-- End of Statcounter Code -->
 """,
-height=0,
 )
