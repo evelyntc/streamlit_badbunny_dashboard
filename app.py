@@ -264,26 +264,23 @@ st.markdown("""
 
 # --- STATCOUNTER ---
 components.html(
-    """
-    <!-- Statcounter Code -->
-    <script type="text/javascript">
-    var sc_project=13141013;
-    var sc_invisible=1;
-    var sc_security="1e0c10d8";
-    </script>
-    <script type="text/javascript"
-    src="https://www.statcounter.com/counter/counter.js"
-    async></script>
-    <noscript>
-        <div class="statcounter">
-            <a title="web counter" href="https://statcounter.com/" target="_blank">
-                <img class="statcounter"
-                src="https://c.statcounter.com/13141013/0/1e0c10d8/1/"
-                alt="web counter"
-                referrerPolicy="no-referrer-when-downgrade">
-            </a>
-        </div>
-    </noscript>
-    """,
-    height=0,
+"""<!-- Default Statcounter code for badbunnydashboard
+https://badbunnydashboard.streamlit.app/ -->
+<script type="text/javascript">
+var sc_project=13202887; 
+var sc_invisible=1; 
+var sc_security="31bf5360"; 
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics"
+href="https://statcounter.com/" target="_blank"><img
+class="statcounter"
+src="https://c.statcounter.com/13202887/0/31bf5360/1/"
+alt="Web Analytics"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->
+""",
+height=0,
 )
